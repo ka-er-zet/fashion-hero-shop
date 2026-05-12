@@ -24,23 +24,24 @@ const recommendationRules: Record<string, Recommendation> = {
     link: "/tools/pro-photo-booking",
   },
   color: {
-    action: "Improve lighting in photos",
-    reason: "Poor lighting makes colors look different. Better photos = fewer color complaints.",
+    action: "Use size chart template",
+    reason: "Poor color representation can be mitigated with better product descriptions and size clarity.",
     expected_impact_pct: 8,
     effort: "low",
-    link: "/tools/photo-tips",
+    link: "/tools/size-chart-template",
   },
   quality: {
-    action: "Upgrade materials or QC process",
-    reason: "Quality issues require product improvements. Review supplier specs and testing.",
+    action: "Book pro-photo session",
+    reason: "High-quality photos reduce perceived quality concerns and build trust.",
     expected_impact_pct: 12,
-    effort: "high",
-    link: "/tools/quality-checklist",
+    effort: "medium",
+    link: "/tools/pro-photo-booking",
   },
 };
 
 export function getRecommendations(
-  reasonBreakdown: ReasonBreakdown[]
+  reasonBreakdown: ReasonBreakdown[],
+  sku_id?: string
 ): Recommendation[] {
   // Sort reasons by percentage descending
   const sortedReasons = [...reasonBreakdown].sort((a, b) => b.pct - a.pct);
@@ -52,8 +53,11 @@ export function getRecommendations(
       recommendationRules[reason.reason] &&
       reason.pct > 0.05 // Only recommend if >5% of returns
     ) {
+      const rec = recommendationRules[reason.reason];
+      const link = sku_id ? `${rec.link}?sku=${sku_id}` : rec.link;
       recommendations.push({
-        ...recommendationRules[reason.reason],
+        ...rec,
+        link,
         reason: `${reason.reason} — ${(reason.pct * 100).toFixed(0)}% of returns mention this`,
       });
     }
@@ -61,12 +65,13 @@ export function getRecommendations(
 
   // If no recommendations from top reasons, add a catch-all
   if (recommendations.length === 0) {
+    const link = sku_id ? `/tools/description-audit?sku=${sku_id}` : "/tools/description-audit";
     recommendations.push({
       action: "Review product description",
       reason: "Ensure descriptions are accurate and match customer expectations.",
       expected_impact_pct: 5,
       effort: "low",
-      link: "/tools/description-audit",
+      link,
     });
   }
 

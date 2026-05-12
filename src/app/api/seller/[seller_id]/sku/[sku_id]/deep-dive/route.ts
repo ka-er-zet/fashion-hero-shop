@@ -34,7 +34,7 @@ export async function GET(
       );
     }
 
-    const recommendations = getRecommendations(sku.reason_breakdown);
+    const recommendations = getRecommendations(sku.reason_breakdown, sku_id);
 
     return NextResponse.json({
       success: true,
